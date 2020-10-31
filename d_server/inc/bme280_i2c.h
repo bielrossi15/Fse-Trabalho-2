@@ -1,0 +1,1 @@
+int initialize_bme(char * i2c_loc, float * T, float * H);
