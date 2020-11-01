@@ -5,6 +5,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 // including my own files
 #include "bme280_i2c.h"
@@ -22,7 +23,7 @@ void alarm_handler(int signal);
 void i2c();
 void get_sensor_values();
 void print_val();
-void * menu();
+void * client_handler();
 
 // helper functions
 void format_time(char *date_string, char *hour_string);
@@ -33,8 +34,9 @@ float T = 0.0,
 int sp[2],
     so[6];
 
-pthread_t t1;
+pthread_t t0, t1;
 FILE *file;
+sem_t sem;
 
 char str_TR[50] = "",
      str_HIST[50] = "";
@@ -58,12 +60,19 @@ int main(int argc, const char * argv[])
         exit(-1);
     }
 
-    if(pthread_create(&t1, NULL, connection_handler, NULL))
+    if(pthread_create(&t0, NULL, connection_handler, NULL))
     {
         exit(-2);
     }
 
-    pthread_join(t1, NULL);
+    if(pthread_create(&t1, NULL, client_handler, NULL))
+    {
+        exit(-3);
+    }
+
+    sem_init(&sem, 0, 0);
+
+    pthread_join(t0, NULL);
 
     return 0;
 }
@@ -83,6 +92,7 @@ void alarm_handler(int signal)
     i2c();
     get_sensor_values();
     print_val();
+    sem_post(&sem);
     alarm(1);
 }   
 
@@ -95,6 +105,18 @@ void get_sensor_values()
 {
     get_sensor_state(sp, so);
 } 
+
+void * client_handler()
+{
+    while(1)
+    {
+        sem_wait(&sem);
+        if(message(&T, &H, sp, so))
+        {
+            printf("Client failed sending data\n");
+        }
+    }
+}
 
 void print_val()
 {
