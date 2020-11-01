@@ -9,8 +9,7 @@
 // including my own files
 #include "bme280_i2c.h"
 #include "gpio.h"
-
-
+#include "server.h"
 
 #define HOUR_SIZE 9
 #define DATE_SIZE 11
@@ -34,7 +33,7 @@ float T = 0.0,
 int sp[2],
     so[6];
 
-pthread_t t0, t1;
+pthread_t t1;
 FILE *file;
 
 char str_TR[50] = "",
@@ -53,10 +52,19 @@ int main(int argc, const char * argv[])
     signal(SIGALRM, alarm_handler);
     alarm(1);
 
-    while(1)
+    if(init_server() < 0)
     {
-        pause();
+        fprintf(stderr, "Error creating server");
+        exit(-1);
     }
+
+    if(pthread_create(&t1, NULL, connection_handler, NULL))
+    {
+        exit(-2);
+    }
+
+    pthread_join(t1, NULL);
+
     return 0;
 }
 
@@ -64,6 +72,8 @@ void sig_handler(int signal)
 {
     printf("\nReceived signal %d, terminating program...\n", signal);
     alarm(0);
+    pthread_cancel(t1);
+    close_sockets();
     exit(0);
 }
 
