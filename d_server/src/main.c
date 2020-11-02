@@ -11,9 +11,7 @@
 #include "bme280_i2c.h"
 #include "gpio.h"
 #include "server.h"
-
-#define HOUR_SIZE 9
-#define DATE_SIZE 11
+#include "client.h"
 
 // functions to handle signals
 void sig_handler(int signal);
@@ -31,15 +29,13 @@ void clear_outputs();
 
 float T = 0.0,
       H = 0.0;
+
 int sp[2],
     so[6];
 
 pthread_t t0, t1;
 FILE *file;
 sem_t sem;
-
-char str_TR[50] = "",
-     str_HIST[50] = "";
 
 
 int main(int argc, const char * argv[])
@@ -91,7 +87,7 @@ void alarm_handler(int signal)
     clear_outputs();
     i2c();
     get_sensor_values();
-    print_val();
+    //print_val();
     sem_post(&sem);
     alarm(1);
 }   
@@ -133,18 +129,6 @@ void print_val()
     }
 }
 
-void format_time(char *date_string, char *hour_string) 
-{
-    time_t rawtime;
-    struct tm * tm_data;
-
-    time(&rawtime);
-    tm_data = localtime(&rawtime);
-
-    sprintf(hour_string, "%02d:%02d:%02d", tm_data->tm_hour, tm_data->tm_min, tm_data->tm_sec);
-
-    sprintf(date_string, "%02d-%02d-%04d", tm_data->tm_mday, tm_data->tm_mon+1, 1900+tm_data->tm_year);
-}
 
 void clear_outputs() {
     #if defined _WIN32

@@ -80,5 +80,13 @@ void * connection_handler()
         {
             send(client_sock, 2, sizeof(int), 0); // message if first byte is unvalid
         }
+
+        close(client_sock);
     }
+}
+
+void close_sockets()
+{
+    close(server_sock);
+    close(client_sock);
 }

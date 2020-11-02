@@ -1,3 +1,3 @@
-void close_connection();
+void close_sockets();
 int init_server();
-void *handle();
+void * connection_handler();

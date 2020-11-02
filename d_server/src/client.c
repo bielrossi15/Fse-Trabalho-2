@@ -5,13 +5,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "tcp_client.h"
+#include "client.h"
 
 int client_socket;
 struct sockaddr_in server_addr;
 
+void close_socket();
+
 int init_client() {
-	unsigned short server_port = 10023;
+	unsigned short server_port = 10025;
 	char * ip_server = "192.168.0.53";
 
 	// Criar Socket
@@ -36,7 +38,10 @@ int message(float * H, float * T, int sp[], int so[])
     }
 
 	if(connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
+	{
+		printf("Cant connect to server \n");
 		return 2;
+	}
 
     if(send(client_socket, (void *) H, sizeof(float), 0) < 0)
 		return -1;
@@ -50,11 +55,13 @@ int message(float * H, float * T, int sp[], int so[])
 	if(send(client_socket, (void *) so, sizeof(int) * 6, 0) < 0)
 		return -4;
 
+	printf("Info sended\n");
 	close_socket();
 
     return 0;
 }
 
-void close_socket(){
+void close_socket()
+{
 	close(client_socket);
 }
