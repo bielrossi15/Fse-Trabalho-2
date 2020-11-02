@@ -1,5 +1,5 @@
 CC = gcc
-LDFLAGS = -lpthread -lbcm2835 
+LDFLAGS = -lpthread 
 BLDDIR = .
 INCDIR = $(BLDDIR)/inc
 SRCDIR = $(BLDDIR)/src

@@ -6,8 +6,6 @@
 #include <unistd.h>
 
 #include "server.h"
-#include "gpio.h"
-
 
 int server_sock;
 int client_sock;
@@ -18,7 +16,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10023;
+	port = 10025;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -50,12 +48,34 @@ int init_server()
     return 0;
 }
 
-void * connection_handler()
+void connection_handler(float * H, float * T, char sp[], char so[])
 {
     unsigned int clen = sizeof(client_addr);
 
     while((client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &clen)))
     {
-        
+        int rcv_size;
+
+        if((rcv_size = recv(client_sock, H, sizeof(H), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, T, sizeof(T), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, sp, sizeof(sp), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, so, sizeof(so), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        close(client_sock);
     }
 }
