@@ -8,7 +8,10 @@
 
 // including my own files
 #include "server.h"
+#include "client.h"
 
+#define HOUR_SIZE 9
+#define DATE_SIZE 11
 
 // functions to handle signals
 void sig_handler(int signal);
@@ -23,11 +26,14 @@ void menu();
 // helper functions
 void format_time(char *date_string, char *hour_string);
 void clear_outputs();
+void file_write(int type, int num, int on_off);
 
 float T = 0.0,
       H = 0.0;
 
-int sp[2],
+int lamp[4],
+    ac[2],
+    sp[2],
     so[6];
 
 pthread_t t0, t1;
@@ -35,13 +41,13 @@ FILE *file;
 
 int main(int argc, const char * argv[])
 {
-
+    
     // all handled signals
     signal(SIGINT, sig_handler);
     signal(SIGTERM, sig_handler);
     signal(SIGTSTP, sig_handler);
     signal(SIGALRM, alarm_handler);
-    alarm(1);
+    //alarm(1);
 
     if(init_server() < 0)
     {
@@ -54,12 +60,13 @@ int main(int argc, const char * argv[])
         menu();
     }
 
+
     return 0;
 }
 
 void * server_handler()
 {
-    connection_handler(&H, &T, sp, so);
+    connection_handler(&H, &T, lamp, ac, sp, so);
 }
 
 void sig_handler(int signal)
@@ -84,6 +91,8 @@ void menu()
     
     short cs = 0;
 
+    int l, a, l_on_off, ac_on_off;
+
     clear_outputs();
 
     printf("========== INTERACTIVE MENU ==========\n  1 -> Print values\n  2 -> Turn on/off lamps\n  3 -> Turn on/off air c\n\n======================================\n");
@@ -95,11 +104,17 @@ void menu()
         case 1:
             printf("T -> %0.2f\nH -> %0.2f\n", H, T);
             
+            for(int i = 0; i < *(&lamp + 1) - lamp; i++)
+                printf("LAMP_%d -> %d\n", i+1, lamp[i]);
+
+            for(int i = 0; i < *(&ac + 1) - ac; i++)
+                printf("AC_%d -> %d\n", i+1, ac[i]);
+
             for(int i = 0; i < *(&sp + 1) - sp; i++)
-                printf("SP_%d -> %d\n", i, sp[i]);
+                printf("SP_%d -> %d\n", i+1, sp[i]);
             
             for(int i = 0; i < *(&so + 1) - so; i++)
-                printf("SO_%d -> %d\n", i, so[i]);
+                printf("SO_%d -> %d\n", i+1, so[i]);
 
             char q;
             printf("\nPRESS 'q' TO RETURN TO MENU");
@@ -119,7 +134,16 @@ void menu()
         break;
 
         case 2:
-            printf("lamp on\n");
+            printf("Wich lamp you like to control? (1-4)\n");
+            scanf("%d", &l);
+
+            printf("\n0 - OFF | 1 - ON\n");
+            scanf("%d", &l_on_off);
+
+
+            if(message(0, l, l_on_off))
+                printf("Error sending request\n");
+
             char j;
             printf("\nPRESS 'q' TO RETURN TO MENU");
 
@@ -134,10 +158,20 @@ void menu()
                     break;
                 }
             }
+            file_write(0, l, l_on_off);
         break;
 
         case 3:
-            printf("air c on\n");
+            printf("Wich AC you like to control? (1-2)\n");
+            scanf("%d", &a);
+
+            printf("\n0 - OFF | 1 - ON\n");
+            scanf("%d", &ac_on_off);
+
+
+            if(message(1, a, ac_on_off))
+                printf("Error sending request\n");
+
             char c;
             printf("\nPRESS 'q' TO RETURN TO MENU");
 
@@ -152,6 +186,7 @@ void menu()
                     break;
                 }
             }
+            file_write(1, a, ac_on_off);
         break;
 
         default:
@@ -167,4 +202,47 @@ void clear_outputs() {
     #elif defined (__APPLE__)
         system("clear");
     #endif
+}
+
+void format_time(char *date_string, char *hour_string) 
+{
+    time_t rawtime;
+    struct tm * tm_data;
+
+    time(&rawtime);
+    tm_data = localtime(&rawtime);
+
+    sprintf(hour_string, "%02d:%02d:%02d", tm_data->tm_hour, tm_data->tm_min, tm_data->tm_sec);
+
+    sprintf(date_string, "%02d-%02d-%04d", tm_data->tm_mday, tm_data->tm_mon+1, 1900+tm_data->tm_year);
+}
+
+void file_write(int type, int number, int on_off)
+{
+    char date[DATE_SIZE];
+    char hour[HOUR_SIZE];
+
+    
+    format_time(date, hour);
+
+    file = fopen("./data.csv", "a+");
+
+    if(type == 0)
+    {
+        if(on_off == 1)
+            fprintf(file, "%s %s -> turned on lamp %d\n", date, hour, number);
+        else
+            fprintf(file, "%s %s -> turned off lamp %d\n", date, hour, number);
+    }
+
+    else if(type == 1)
+    {
+        if(on_off == 1)
+            fprintf(file, "%s %s -> turned on ac %d\n", date, hour, number);
+        else
+            fprintf(file, "%s %s -> turned off ac %d\n", date, hour, number);
+    }
+    
+    fclose(file);
+
 }
