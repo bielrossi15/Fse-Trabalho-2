@@ -16,7 +16,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10025;
+	port = 10031;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -48,7 +48,7 @@ int init_server()
     return 0;
 }
 
-void connection_handler(float * H, float * T, char sp[], char so[])
+void connection_handler(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
 {
     unsigned int clen = sizeof(client_addr);
 
@@ -66,6 +66,16 @@ void connection_handler(float * H, float * T, char sp[], char so[])
             send(client_sock, 1, sizeof(int), 0);
         }
 
+        if((rcv_size = recv(client_sock, lamp, sizeof(lamp), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, ac, sizeof(ac), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
         if((rcv_size = recv(client_sock, sp, sizeof(sp), 0)) < 0)
         {
             send(client_sock, 1, sizeof(int), 0);
@@ -78,4 +88,10 @@ void connection_handler(float * H, float * T, char sp[], char so[])
 
         close(client_sock);
     }
+}
+
+void close_sockets()
+{
+    close(server_sock);
+    close(client_sock);
 }
