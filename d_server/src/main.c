@@ -78,7 +78,7 @@ void sig_handler(int signal)
 
 void alarm_handler(int signal)
 {
-    //pthread_create(&t2, NULL, sensor_update, NULL);
+    pthread_create(&t2, NULL, sensor_update, NULL);
 
     if(count == 5)
     {

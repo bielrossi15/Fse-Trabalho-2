@@ -17,7 +17,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10026;
+	port = 10040;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
