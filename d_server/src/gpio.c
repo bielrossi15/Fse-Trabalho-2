@@ -3,14 +3,19 @@
 #include <bcm2835.h>
 #include <gpio.h>
 
+#include "client.h"
+
 #define L_1 RPI_V2_GPIO_P1_11 // KITCHEN
 #define L_2 RPI_V2_GPIO_P1_12 // LIVING ROOM
 #define L_3 RPI_V2_GPIO_P1_13 // BEDROOM 1
 #define L_4 RPI_V2_GPIO_P1_15 // BEDROOM 2
+
 #define AC_1 RPI_V2_GPIO_P1_16 // BEDROOM 1
 #define AC_2 RPI_V2_GPIO_P1_18 // BEDROOM 2
+
 #define SP_1 RPI_V2_GPIO_P1_22 // LIVING ROOM
 #define SP_2 RPI_V2_GPIO_P1_37 // KITCHEN
+
 #define SO_1 RPI_V2_GPIO_P1_29 // KITCHEN DOOR
 #define SO_2 RPI_V2_GPIO_P1_31 // KITCHEN WINDOW
 #define SO_3 RPI_V2_GPIO_P1_32 // LIVING ROOM DOOR
@@ -93,8 +98,16 @@ void set_ac_state(short value, short opt)
     }
 }
 
-void get_sensor_state(int sp[], int so[])
+void get_sensor_state(int lamp[], int ac[], int sp[], int so[])
 {
+    lamp[0] = bcm2835_gpio_lev(L_1);
+    lamp[1] = bcm2835_gpio_lev(L_2);
+    lamp[2] = bcm2835_gpio_lev(L_3);
+    lamp[3] = bcm2835_gpio_lev(L_4);
+
+    ac[0] = bcm2835_gpio_lev(AC_1);
+    ac[1] = bcm2835_gpio_lev(AC_2);
+    
     sp[0] = bcm2835_gpio_lev(SP_1);
     sp[1] = bcm2835_gpio_lev(SP_2);
 

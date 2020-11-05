@@ -8,7 +8,6 @@
 #include "server.h"
 #include "gpio.h"
 
-
 int server_sock;
 int client_sock;
 struct sockaddr_in server_addr;
@@ -18,7 +17,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10022;
+	port = 10026;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -67,6 +66,7 @@ void * connection_handler()
         if(ans[0] == 0)
         {
             set_lamp_state(ans[2], ans[1]);
+            printf("%d -> %d\n", ans[2], ans[1]);
             send(client_sock, 0, sizeof(int), 0);
         }
 
