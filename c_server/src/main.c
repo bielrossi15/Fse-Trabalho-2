@@ -47,7 +47,7 @@ int main(int argc, const char * argv[])
     signal(SIGTERM, sig_handler);
     signal(SIGTSTP, sig_handler);
     signal(SIGALRM, alarm_handler);
-    //alarm(1);
+    alarm(1);
 
     if(init_server() < 0)
     {
@@ -73,6 +73,7 @@ void sig_handler(int signal)
 {
     printf("\nReceived signal %d, terminating program...\n", signal);
     alarm(0);
+    close_sockets();
     exit(0);
 }
 

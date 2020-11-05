@@ -16,7 +16,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10030;
+	port = 10031;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -88,4 +88,10 @@ void connection_handler(float * H, float * T, int lamp[], int ac[], int sp[], in
 
         close(client_sock);
     }
+}
+
+void close_sockets()
+{
+    close(server_sock);
+    close(client_sock);
 }

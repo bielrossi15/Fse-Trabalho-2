@@ -13,7 +13,7 @@ struct sockaddr_in server_addr;
 void close_socket();
 
 int init_client() {
-	unsigned short server_port = 10026;
+	unsigned short server_port = 10040;
 	char * ip_server = "192.168.0.52";
 
 	// Criar Socket
