@@ -15,12 +15,12 @@ struct sensor {
     uint8_t fd;
 };
 
-int stream_sensor_data(struct bme280_dev *dev, float * T, float * H);
+int stream_sensor_data(struct bme280_dev *dev, double * T, double * H);
 int8_t user_i2c_read(uint8_t reg_addr, uint8_t *data, uint32_t len, void *intf_ptr);
 int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *data, uint32_t len, void *intf_ptr);
 void user_delay_us(uint32_t period, void *intf_ptr);
 
-int initialize_bme(char * i2c_loc, float * T, float * H) 
+int initialize_bme(char * i2c_loc, double * T, double * H) 
 {
     struct bme280_dev dev;
     struct sensor id;
@@ -99,7 +99,7 @@ int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *data, uint32_t len, void 
     return BME280_OK;
 }
 
-int stream_sensor_data(struct bme280_dev *dev, float * T, float * H) {
+int stream_sensor_data(struct bme280_dev *dev, double * T, double * H) {
     int8_t result;
     uint8_t settings;
     struct bme280_data comp_data;

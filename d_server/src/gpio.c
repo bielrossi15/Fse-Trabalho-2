@@ -93,6 +93,10 @@ void set_ac_state(int value, int opt)
         case 2:
             bcm2835_gpio_write(AC_2, value);
             break;
+        case 3:
+            bcm2835_gpio_write(AC_1, value);
+            bcm2835_gpio_write(AC_2, value);
+            break;
         default:
             break;
     }

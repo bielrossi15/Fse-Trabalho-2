@@ -21,16 +21,20 @@ void alarm_handler(int signal);
 void * i2c();
 void * get_sensor_values();
 void * client_handler();
+void * server_handler();
 void * sensor_update();
+void * temperature_handler();
 
-float T = 0.0,
-      H = 0.0;
+double T = 0.0,
+      H = 0.0,
+      AC_TEMP = 100.0;
 
 int lamp[4],
     ac[2],
     sp[2],
     so[6],
-    count = 0;
+    count = 0,
+    ac_on_mode = 0;
 
 pthread_t t0, t1, t2, t3, t4, t5;
 FILE *file;
@@ -55,7 +59,7 @@ int main(int argc, const char * argv[])
         exit(-1);
     }
     
-    pthread_create(&t0, NULL, connection_handler, NULL);
+    pthread_create(&t0, NULL, server_handler, NULL);
     
     pthread_create(&t1, NULL, client_handler, NULL);
 
@@ -85,6 +89,7 @@ void alarm_handler(int signal)
         sem_post(&sem);
         i2c();
         get_sensor_values();
+        pthread_create(&t3, NULL, temperature_handler, NULL);
         count = 0;
     }
 
@@ -99,6 +104,29 @@ void * i2c()
 void * get_sensor_values()
 {
     get_sensor_state(lamp, ac, sp, so);
+}
+
+void * temperature_handler()
+{
+    if(T > AC_TEMP)
+    {     
+        if(ac_on_mode == 0)
+        {
+            set_ac_state(1, 3);
+            ac_on_mode = 1;
+            printf("%.2lf %.2lf\n", T, AC_TEMP);
+        }
+    }
+
+    else
+    {
+        set_ac_state(0, 3);
+    }
+}
+
+void * server_handler()
+{
+    connection_handler(&AC_TEMP);
 }
 
 void * sensor_update()

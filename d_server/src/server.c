@@ -49,7 +49,7 @@ int init_server()
     return 0;
 }
 
-void * connection_handler()
+void connection_handler(double * AC_TEMP)
 {
     unsigned int clen = sizeof(client_addr);
 
@@ -73,6 +73,17 @@ void * connection_handler()
         else if(ans[0] == 1)
         {
             set_ac_state(ans[1], ans[2]);
+            send(client_sock, 0, sizeof(int), 0);
+        }
+
+        else if(ans[0] == 2)
+        {
+            double temp;
+
+            recv(client_sock, &temp, sizeof(double), 0);
+
+            *AC_TEMP = temp;
+
             send(client_sock, 0, sizeof(int), 0);
         }
 

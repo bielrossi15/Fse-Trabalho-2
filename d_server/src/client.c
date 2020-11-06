@@ -12,7 +12,7 @@ int client_socket;
 struct sockaddr_in server_addr;
 
 int init_client() {
-	unsigned short server_port = 10032;
+	unsigned short server_port = 10031;
 	char * ip_server = "192.168.0.53";
 
 	// Criar Socket
@@ -28,10 +28,11 @@ int init_client() {
 	return 0;
 }
 
-int message(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
+int message(double * H, double * T, int lamp[], int ac[], int sp[], int so[])
 {
 
-	char opt;
+	int opt = 0;
+	int error;
 	
 	init_client();
 
@@ -41,17 +42,17 @@ int message(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
 		return 2;
 	}
 
-	// if(send(client_socket, (void *) opt, sizeof(opt), 0) < 0)
+	// if((error = send(client_socket, (void *) opt, sizeof(int), 0)) < 0)
 	// {
-	// 	printf("a\n");
+	// 	printf("%d\n", error);
 	// 	return -8;
 	// }
 		
 
-    if(send(client_socket, (void *) H, sizeof(H), 0) < 0)
+    if(send(client_socket, (void *) H, sizeof(double), 0) < 0)
 		return -1;
 
-    if(send(client_socket, (void *) T, sizeof(T), 0) < 0)
+    if(send(client_socket, (void *) T, sizeof(double), 0) < 0)
 		return -2;
 
 	if(send(client_socket, (void *) lamp, sizeof(int) * 4, 0) < 0)
