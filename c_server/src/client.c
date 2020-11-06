@@ -29,7 +29,7 @@ int init_client() {
 	return 0;
 }
 
-int message(int type, int opt, int on_off)
+int message(int type, int opt, int on_off, double temp)
 {
     char msg[3];
 
@@ -44,9 +44,6 @@ int message(int type, int opt, int on_off)
 		return -1;
 	}
 
-    else
-        printf("Connected\n"); 
-
     if(type == 0)
     {
         msg[0] = 0;
@@ -58,9 +55,6 @@ int message(int type, int opt, int on_off)
             printf("Cant send message\n");
             return -2;
         }
-        
-        else
-            printf("message sent\n");
     }
 
     if(type == 1)
@@ -71,6 +65,19 @@ int message(int type, int opt, int on_off)
 
         if(send(client_socket, (void *) msg, sizeof(char) * 3, 0) < 0)
 		    return -3;
+    }
+
+    if(type == 2)
+    {
+        msg[0] = 2;
+        msg[1] = 0;
+        msg[2] = 0;
+
+        if(send(client_socket, (void *) msg, sizeof(char) * 3, 0) < 0)
+		    return -3;
+
+        if(send(client_socket, (void *) &temp, sizeof(double), 0) < 0)
+		    return -4;
     }
 
     

@@ -26,9 +26,9 @@ void menu();
 // helper functions
 void format_time(char *date_string, char *hour_string);
 void clear_outputs();
-void file_write(int type, int num, int on_off);
+void file_write(int type, int number, int on_off, double temp);
 
-float T = 0.0,
+double T = 0.0,
       H = 0.0;
 
 int lamp[4],
@@ -93,17 +93,18 @@ void menu()
     short cs = 0;
 
     int l, a, l_on_off, ac_on_off;
+    double temp;
 
     clear_outputs();
 
-    printf("========== INTERACTIVE MENU ==========\n  1 -> Print values\n  2 -> Turn on/off lamps\n  3 -> Turn on/off air c\n\n======================================\n");
+    printf("========== INTERACTIVE MENU ==========\n  1 -> Print values\n  2 -> Turn on/off lamps\n  3 -> Turn on/off air c\n  4 -> Choose new AC temperature\n ======================================\n");
     printf("-> ");
     scanf("%hd", &cs);
     printf("\n");
     switch (cs)
     {
         case 1:
-            printf("T -> %0.2f\nH -> %0.2f\n", H, T);
+            printf("T -> %lf\nH -> %lf\n", H, T);
             
             for(int i = 0; i < *(&lamp + 1) - lamp; i++)
                 printf("LAMP_%d -> %d\n", i+1, lamp[i]);
@@ -118,7 +119,7 @@ void menu()
                 printf("SO_%d -> %d\n", i+1, so[i]);
 
             char q;
-            printf("\nPRESS 'q' TO RETURN TO MENU");
+            printf("PRESS 'q' TO RETURN TO MENU");
         
             while(1)
             {
@@ -142,11 +143,11 @@ void menu()
             scanf("%d", &l_on_off);
 
 
-            if(message(0, l, l_on_off))
+            if(message(0, l, l_on_off, 0.0))
                 printf("Error sending request\n");
 
             char j;
-            printf("\nPRESS 'q' TO RETURN TO MENU");
+            printf("PRESS 'q' TO RETURN TO MENU");
 
             while(1)
             {
@@ -159,7 +160,7 @@ void menu()
                     break;
                 }
             }
-            file_write(0, l, l_on_off);
+            file_write(0, l, l_on_off, 0.0);
         break;
 
         case 3:
@@ -170,11 +171,11 @@ void menu()
             scanf("%d", &ac_on_off);
 
 
-            if(message(1, a, ac_on_off))
+            if(message(1, a, ac_on_off, 0.0))
                 printf("Error sending request\n");
 
             char c;
-            printf("\nPRESS 'q' TO RETURN TO MENU");
+            printf("PRESS 'q' TO RETURN TO MENU");
 
             while(1)
             {
@@ -187,7 +188,31 @@ void menu()
                     break;
                 }
             }
-            file_write(1, a, ac_on_off);
+            file_write(1, a, ac_on_off, 0.0);
+        break;
+
+        case 4:
+            printf("Choose an AC temperature\n");
+            scanf("%lf", &temp);
+
+            if(message(2, 0, 0, temp))
+                printf("Error sending request\n");
+
+            char n;
+            printf("PRESS 'q' TO RETURN TO MENU");
+
+            while(1)
+            {
+                scanf("%c", &n);
+                printf("\n");
+
+                if(n == 'q')
+                {
+                    clear_outputs();
+                    break;
+                }
+            }
+            file_write(2, 1, 0, temp);
         break;
 
         default:
@@ -218,7 +243,7 @@ void format_time(char *date_string, char *hour_string)
     sprintf(date_string, "%02d-%02d-%04d", tm_data->tm_mday, tm_data->tm_mon+1, 1900+tm_data->tm_year);
 }
 
-void file_write(int type, int number, int on_off)
+void file_write(int type, int number, int on_off, double temp)
 {
     char date[DATE_SIZE];
     char hour[HOUR_SIZE];
@@ -242,6 +267,11 @@ void file_write(int type, int number, int on_off)
             fprintf(file, "%s %s -> turned on ac %d\n", date, hour, number);
         else
             fprintf(file, "%s %s -> turned off ac %d\n", date, hour, number);
+    }
+
+    else if(type == 2)
+    {
+        fprintf(file, "%s %s -> changed ac temperature to %.2lf\n", date, hour, temp);
     }
     
     fclose(file);

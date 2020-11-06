@@ -16,7 +16,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10032;
+	port = 10031;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -48,28 +48,28 @@ int init_server()
     return 0;
 }
 
-void connection_handler(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
+void connection_handler(double * H, double * T, int lamp[], int ac[], int sp[], int so[])
 {
     unsigned int clen = sizeof(client_addr);
-    char opt;
+    int opt = 0;
 
     while((client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &clen)))
     {
         int rcv_size;
 
-            if((rcv_size = recv(client_sock, opt, sizeof(opt), 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
-
-        // if(opt == 0)
+        // if((rcv_size = recv(client_sock, opt, sizeof(opt), 0)) < 0)
         // {
-            if((rcv_size = recv(client_sock, H, sizeof(H), 0)) < 0)
+        //     send(client_sock, 1, sizeof(int), 0);
+        // }
+
+        if(opt == 0)
+        {
+            if((rcv_size = recv(client_sock, H, sizeof(double), 0)) < 0)
             {
                 send(client_sock, 1, sizeof(int), 0);
             }
 
-            if((rcv_size = recv(client_sock, T, sizeof(T), 0)) < 0)
+            if((rcv_size = recv(client_sock, T, sizeof(double), 0)) < 0)
             {
                 send(client_sock, 1, sizeof(int), 0);
             }
@@ -93,12 +93,12 @@ void connection_handler(float * H, float * T, int lamp[], int ac[], int sp[], in
             {
                 send(client_sock, 1, sizeof(int), 0);
             }
-        // }
+        }
 
-        // else
-        // {
-        //     printf("a\n");
-        // }char
+        else
+        {
+            printf("a\n");
+        }
 
         close(client_sock);
     }
