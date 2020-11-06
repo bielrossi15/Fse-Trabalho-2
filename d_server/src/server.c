@@ -58,21 +58,21 @@ void * connection_handler()
         char ans[3];
         int rcv_size;
 
-        if((rcv_size = recv(client_sock, ans, sizeof(ans), 0)) < 0)
+        if((rcv_size = recv(client_sock, ans, sizeof(char) * 3, 0)) < 0)
         {
             send(client_sock, 1, sizeof(int), 0);
         }
 
         if(ans[0] == 0)
         {
-            set_lamp_state(ans[2], ans[1]);
+            set_lamp_state(ans[1], ans[2]);
             printf("%d -> %d\n", ans[2], ans[1]);
             send(client_sock, 0, sizeof(int), 0);
         }
 
         else if(ans[0] == 1)
         {
-            set_ac_state(ans[2], ans[1]);
+            set_ac_state(ans[1], ans[2]);
             send(client_sock, 0, sizeof(int), 0);
         }
 

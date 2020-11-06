@@ -52,7 +52,7 @@ void configure_pins()
 
 }
 
-void set_lamp_state(short value, short opt)
+void set_lamp_state(int value, int opt)
 {
     if(value != 0 && value != 1)
     {
@@ -78,7 +78,7 @@ void set_lamp_state(short value, short opt)
     }
 }
 
-void set_ac_state(short value, short opt)
+void set_ac_state(int value, int opt)
 {
     if(value != 0 && value != 1)
     {
