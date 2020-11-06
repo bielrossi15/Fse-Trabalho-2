@@ -9,12 +9,14 @@
 - Para executar, compile os dois servidores nas suas respectivas maquinas e execute-os;
 - Para o servidor central:
 ```
+git clone https://github.com/bielrossi15/Fse-Trabalho-2.git
 cd c_server/
 make
 ./bin/bin
 ```
 - Para o servidor distribuido:
 ```
+git clone https://github.com/bielrossi15/Fse-Trabalho-2.git
 cd d_server/
 make
 ./bin/bin
