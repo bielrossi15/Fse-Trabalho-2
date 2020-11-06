@@ -11,9 +11,8 @@
 int client_socket;
 struct sockaddr_in server_addr;
 
-
 int init_client() {
-	unsigned short server_port = 10030;
+	unsigned short server_port = 10031;
 	char * ip_server = "192.168.0.53";
 
 	// Criar Socket
@@ -26,16 +25,24 @@ int init_client() {
 	server_addr.sin_addr.s_addr = inet_addr(ip_server);
 	server_addr.sin_port = htons(server_port);
 
-
 	return 0;
 }
 
 int message(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
 {
-	if(init_client())
-    {
-        return 1;
-    }
+
+	unsigned short server_port = 10031;
+	char * ip_server = "192.168.0.53";
+
+	// Criar Socket
+	if((client_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+		return 1;
+
+	// Construir struct sockaddr_in
+	memset(&server_addr, 0, sizeof(server_addr)); // Zerando a estrutura de dados
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = inet_addr(ip_server);
+	server_addr.sin_port = htons(server_port);
 
 	if(connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
 	{
@@ -61,7 +68,8 @@ int message(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
 	if(send(client_socket, (void *) so, sizeof(so), 0) < 0)
 		return -6;
 
-	printf("info sended\n");
+	// printf("info sended\n");
+
 	close_socket();
 
     return 0;
@@ -82,6 +90,8 @@ int sensor_message(char sensor_data[])
 
 	if(send(client_socket, (void *) sensor_data, sizeof(sensor_data), 0) < 0)
 		return -2;
+
+	close_socket();
 
 	return 0;
 }
