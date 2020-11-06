@@ -53,7 +53,7 @@ int message(int type, int opt, int on_off)
         msg[1] = on_off;
         msg[2] = opt;
 
-        if(send(client_socket, (void *) msg, sizeof(msg), 0) < 0)
+        if(send(client_socket, (void *) msg, sizeof(char) * 3, 0) < 0)
         {
             printf("Cant send message\n");
             return -2;
@@ -69,7 +69,7 @@ int message(int type, int opt, int on_off)
         msg[1] = on_off;
         msg[2] = opt;
 
-        if(send(client_socket, (void *) msg, sizeof(msg), 0) < 0)
+        if(send(client_socket, (void *) msg, sizeof(char) * 3, 0) < 0)
 		    return -3;
     }
 

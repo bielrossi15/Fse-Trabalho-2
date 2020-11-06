@@ -16,7 +16,7 @@ unsigned short port;
 int init_server()
 {
 
-	port = 10031;
+	port = 10032;
 
 	// Abrir Socket
 	if((server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -51,40 +51,54 @@ int init_server()
 void connection_handler(float * H, float * T, int lamp[], int ac[], int sp[], int so[])
 {
     unsigned int clen = sizeof(client_addr);
+    char opt;
 
     while((client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &clen)))
     {
         int rcv_size;
 
-        if((rcv_size = recv(client_sock, H, sizeof(H), 0)) < 0)
-        {
-            send(client_sock, 1, sizeof(int), 0);
-        }
+            if((rcv_size = recv(client_sock, opt, sizeof(opt), 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
 
-        if((rcv_size = recv(client_sock, T, sizeof(T), 0)) < 0)
-        {
-            send(client_sock, 1, sizeof(int), 0);
-        }
+        // if(opt == 0)
+        // {
+            if((rcv_size = recv(client_sock, H, sizeof(H), 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
 
-        if((rcv_size = recv(client_sock, lamp, sizeof(lamp), 0)) < 0)
-        {
-            send(client_sock, 1, sizeof(int), 0);
-        }
+            if((rcv_size = recv(client_sock, T, sizeof(T), 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
 
-        if((rcv_size = recv(client_sock, ac, sizeof(ac), 0)) < 0)
-        {
-            send(client_sock, 1, sizeof(int), 0);
-        }
+            if((rcv_size = recv(client_sock, lamp, sizeof(int) * 4, 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
 
-        if((rcv_size = recv(client_sock, sp, sizeof(sp), 0)) < 0)
-        {
-            send(client_sock, 1, sizeof(int), 0);
-        }
+            if((rcv_size = recv(client_sock, ac, sizeof(int) * 2, 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
 
-        if((rcv_size = recv(client_sock, so, sizeof(so), 0)) < 0)
-        {
-            send(client_sock, 1, sizeof(int), 0);
-        }
+            if((rcv_size = recv(client_sock, sp, sizeof(int) * 2, 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
+
+            if((rcv_size = recv(client_sock, so, sizeof(int) * 6, 0)) < 0)
+            {
+                send(client_sock, 1, sizeof(int), 0);
+            }
+        // }
+
+        // else
+        // {
+        //     printf("a\n");
+        // }char
 
         close(client_sock);
     }
@@ -93,5 +107,4 @@ void connection_handler(float * H, float * T, int lamp[], int ac[], int sp[], in
 void close_sockets()
 {
     close(server_sock);
-    close(client_sock);
 }
