@@ -102,7 +102,7 @@ void set_ac_state(int value, int opt)
     }
 }
 
-void get_sensor_state(int lamp[], int ac[], int sp[], int so[])
+void get_state(int lamp[], int ac[], int sp[], int so[])
 {
     lamp[0] = bcm2835_gpio_lev(L_1);
     lamp[1] = bcm2835_gpio_lev(L_2);
@@ -112,6 +112,20 @@ void get_sensor_state(int lamp[], int ac[], int sp[], int so[])
     ac[0] = bcm2835_gpio_lev(AC_1);
     ac[1] = bcm2835_gpio_lev(AC_2);
     
+    sp[0] = bcm2835_gpio_lev(SP_1);
+    sp[1] = bcm2835_gpio_lev(SP_2);
+
+    so[0] = bcm2835_gpio_lev(SO_1);
+    so[1] = bcm2835_gpio_lev(SO_2);
+    so[2] = bcm2835_gpio_lev(SO_3);
+    so[3] = bcm2835_gpio_lev(SO_4);
+    so[4] = bcm2835_gpio_lev(SO_5);
+    so[5] = bcm2835_gpio_lev(SO_6);
+}
+
+
+void get_sensor_state(int sp[], int so[])
+{
     sp[0] = bcm2835_gpio_lev(SP_1);
     sp[1] = bcm2835_gpio_lev(SP_2);
 

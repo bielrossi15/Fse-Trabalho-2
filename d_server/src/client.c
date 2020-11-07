@@ -38,17 +38,12 @@ int message(double * H, double * T, int lamp[], int ac[], int sp[], int so[])
 
 	if(connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
 	{
-		printf("Cant connect to server \n");
-		return 2;
+		return 1;
 	}
 
-	// if((error = send(client_socket, (void *) opt, sizeof(int), 0)) < 0)
-	// {
-	// 	printf("%d\n", error);
-	// 	return -8;
-	// }
+	if(send(client_socket, (void *) &opt, sizeof(int), 0) < 0)
+		return 2;
 		
-
     if(send(client_socket, (void *) H, sizeof(double), 0) < 0)
 		return -1;
 
@@ -74,8 +69,10 @@ int message(double * H, double * T, int lamp[], int ac[], int sp[], int so[])
     return 0;
 }
 
-int sensor_message(char sensor_data[])
+int sensor_message(int sp[], int so[])
 {
+	int opt = 1;
+
 	if(init_client())
     {
         return 1;
@@ -83,11 +80,16 @@ int sensor_message(char sensor_data[])
 
 	if(connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
 	{
-		printf("Cant connect to server \n");
 		return -1;
 	}
 
-	if(send(client_socket, (void *) sensor_data, sizeof(sensor_data), 0) < 0)
+	if(send(client_socket, (void *) &opt, sizeof(int), 0) < 0)
+		return -2;
+
+	if(send(client_socket, (void *) &sp, sizeof(sp), 0) < 0)
+		return -2;
+
+	if(send(client_socket, (void *) &so, sizeof(so), 0) < 0)
 		return -2;
 
 	close_socket();

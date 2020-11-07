@@ -33,6 +33,7 @@ int lamp[4],
     ac[2],
     sp[2],
     so[6],
+    sp_counter[2],
     count = 0,
     ac_on_mode = 0;
 
@@ -43,6 +44,8 @@ sem_t sem;
 
 int main(int argc, const char * argv[])
 {
+    sp_counter[0] = 0;
+    sp_counter[1] = 0;
 
     configure_pins();
 
@@ -51,7 +54,7 @@ int main(int argc, const char * argv[])
     signal(SIGTERM, sig_handler);
     signal(SIGTSTP, sig_handler);
     signal(SIGALRM, alarm_handler);
-    ualarm(200000, 200000);
+    alarm(1);
 
     if(init_server() < 0)
     {
@@ -77,23 +80,23 @@ void sig_handler(int signal)
     pthread_cancel(t0);
     close_sockets();
     close_socket();
+    set_lamp_state(0, 1);
+    set_lamp_state(0, 2);
+    set_lamp_state(0, 3);
+    set_lamp_state(0, 4);
+    set_ac_state(0, 1);
+    set_ac_state(0, 2);
+    bcm2835_close();
     exit(0);
 }
 
 void alarm_handler(int signal)
 {
-    pthread_create(&t2, NULL, sensor_update, NULL);
-
-    if(count == 5)
-    {
-        sem_post(&sem);
-        i2c();
-        get_sensor_values();
-        pthread_create(&t3, NULL, temperature_handler, NULL);
-        count = 0;
-    }
-
-    count++;
+    sem_post(&sem);
+    i2c();
+    get_sensor_values();
+    pthread_create(&t3, NULL, temperature_handler, NULL);
+    alarm(1);
 }   
 
 void * i2c()
@@ -103,7 +106,7 @@ void * i2c()
 
 void * get_sensor_values()
 {
-    get_sensor_state(lamp, ac, sp, so);
+    get_state(lamp, ac, sp, so);
 }
 
 void * temperature_handler()
@@ -127,40 +130,6 @@ void * temperature_handler()
 void * server_handler()
 {
     connection_handler(&AC_TEMP);
-}
-
-void * sensor_update()
-{
-    int a[4],
-        b[2],
-        sp_a[2],
-        so_a[6];
-    
-    char sensor_data[2];
-    
-    get_sensor_state(a, b, sp_a, so_a);
-
-    for(int i = 0; i < 2; i++)
-    {
-        if(sp_a[i] != sp[i] && sp_a[i] == 1)
-        {
-            sensor_data[0] = 'p';
-            sensor_data[1] = i;
-            sensor_message(sensor_data);
-        }
-            
-    }
-
-    for(int i = 0; i < 6; i++)
-    {
-        if(so_a[i] != so[i] && so_a[i] == 1)
-        {
-            sensor_data[0] = 'o';
-            sensor_data[1] = i;
-            sensor_message(sensor_data);
-        }
-    }    
-
 }
 
 void * client_handler()
