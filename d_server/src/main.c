@@ -139,7 +139,7 @@ void * client_handler()
         sem_wait(&sem);
         if(message(&T, &H, lamp, ac, sp, so))
         {
-            printf("Client failed sending data\n");
+            printf("Error sending data, trying again...\n");
         }
     }
 }
