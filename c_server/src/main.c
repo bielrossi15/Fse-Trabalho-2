@@ -31,16 +31,13 @@ int lamp[4],
     ac[2],
     sp[2],
     so[6],
-    sp_old[2],
-    so_old[6];
+    sp_old[2] = { 1, 1 },
+    so_old[6] = { 1, 1, 1, 1, 1, 1 };
 
 pthread_t t0, t1;
 
 int main(int argc, const char * argv[])
 {
-
-    memset(sp_old, 1, 2 * sizeof(sp_old[0]));
-    memset(so_old, 1, 6 * sizeof(so_old[0]));
     
     // all handled signals
     signal(SIGINT, sig_handler);
@@ -75,6 +72,7 @@ void * sensor_status()
     {
         if(sp[i] != sp_old[i] && sp[i] == 1)
         {
+            system("omxplayer ../4cd33cb95f308477d770210720e9d74d1ab0fa58.mp3 > /dev/null 2>&1");
             file_write(3, 0, 0, 0.0);
         }
         sp_old[i] = sp[i];
@@ -84,6 +82,7 @@ void * sensor_status()
     {
         if(so[i] != so_old[i] && so[i] == 1)
         {
+            system("omxplayer ../4cd33cb95f308477d770210720e9d74d1ab0fa58.mp3 > /dev/null 2>&1");
             file_write(3, 0, 0, 0.0);
         }
 
@@ -104,14 +103,11 @@ void sig_handler(int signal)
 void alarm_handler(int signal)
 {
 
+    sensor_status();
+
     if(pthread_create(&t0, NULL, server_handler, NULL))
     {
-        exit(-2);
-    }
-
-    if(pthread_create(&t1, NULL, sensor_status, NULL))
-    {
-        exit(-2);
+        exit(-1);
     }
 
     alarm(1);

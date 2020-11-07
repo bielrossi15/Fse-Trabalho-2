@@ -52,9 +52,7 @@ int init_server()
 void connection_handler(double * H, double * T, int lamp[], int ac[], int sp[], int so[])
 {
     unsigned int clen = sizeof(client_addr);
-    int opt = 0,
-        sp_new[2],
-        so_new[6];
+    int opt = 0;
 
     while((client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &clen)))
     {
