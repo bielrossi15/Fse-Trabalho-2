@@ -2,16 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <time.h>
 #include <unistd.h>
 #include <pthread.h>
 
 // including my own files
 #include "server.h"
 #include "client.h"
-
-#define HOUR_SIZE 9
-#define DATE_SIZE 11
+#include "helper_functions.h"
 
 // functions to handle signals
 void sig_handler(int signal);
@@ -26,21 +23,24 @@ void menu();
 // helper functions
 void format_time(char *date_string, char *hour_string);
 void clear_outputs();
-void file_write(int type, int number, int on_off, double temp);
 
 double T = 0.0,
-      H = 0.0;
+       H = 0.0;
 
 int lamp[4],
     ac[2],
     sp[2],
-    so[6];
+    so[6],
+    sp_old[2],
+    so_old[6];
 
 pthread_t t0, t1;
-FILE *file;
 
 int main(int argc, const char * argv[])
 {
+
+    memset(sp_old, 1, 2 * sizeof(sp_old[0]));
+    memset(so_old, 1, 6 * sizeof(so_old[0]));
     
     // all handled signals
     signal(SIGINT, sig_handler);
@@ -69,6 +69,30 @@ void * server_handler()
     connection_handler(&H, &T, lamp, ac, sp, so);
 }
 
+void * sensor_status()
+{
+    for(int i = 0; i < 2; i++)
+    {
+        if(sp[i] != sp_old[i] && sp[i] == 1)
+        {
+            file_write(3, 0, 0, 0.0);
+        }
+        sp_old[i] = sp[i];
+    }
+
+    for(int i = 0; i < 6; i++)
+    {
+        if(so[i] != so_old[i] && so[i] == 1)
+        {
+            file_write(3, 0, 0, 0.0);
+        }
+
+        so_old[i] = so[i];
+    }
+
+    
+}
+
 void sig_handler(int signal)
 {
     printf("\nReceived signal %d, terminating program...\n", signal);
@@ -79,7 +103,13 @@ void sig_handler(int signal)
 
 void alarm_handler(int signal)
 {
+
     if(pthread_create(&t0, NULL, server_handler, NULL))
+    {
+        exit(-2);
+    }
+
+    if(pthread_create(&t1, NULL, sensor_status, NULL))
     {
         exit(-2);
     }
@@ -228,52 +258,4 @@ void clear_outputs() {
     #elif defined (__APPLE__)
         system("clear");
     #endif
-}
-
-void format_time(char *date_string, char *hour_string) 
-{
-    time_t rawtime;
-    struct tm * tm_data;
-
-    time(&rawtime);
-    tm_data = localtime(&rawtime);
-
-    sprintf(hour_string, "%02d:%02d:%02d", tm_data->tm_hour, tm_data->tm_min, tm_data->tm_sec);
-
-    sprintf(date_string, "%02d-%02d-%04d", tm_data->tm_mday, tm_data->tm_mon+1, 1900+tm_data->tm_year);
-}
-
-void file_write(int type, int number, int on_off, double temp)
-{
-    char date[DATE_SIZE];
-    char hour[HOUR_SIZE];
-
-    
-    format_time(date, hour);
-
-    file = fopen("./data.csv", "a+");
-
-    if(type == 0)
-    {
-        if(on_off == 1)
-            fprintf(file, "%s %s -> turned on lamp %d\n", date, hour, number);
-        else
-            fprintf(file, "%s %s -> turned off lamp %d\n", date, hour, number);
-    }
-
-    else if(type == 1)
-    {
-        if(on_off == 1)
-            fprintf(file, "%s %s -> turned on ac %d\n", date, hour, number);
-        else
-            fprintf(file, "%s %s -> turned off ac %d\n", date, hour, number);
-    }
-
-    else if(type == 2)
-    {
-        fprintf(file, "%s %s -> changed ac temperature to %.2lf\n", date, hour, temp);
-    }
-    
-    fclose(file);
-
 }

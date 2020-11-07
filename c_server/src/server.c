@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "server.h"
+#include "helper_functions.h"
 
 int server_sock;
 int client_sock;
@@ -51,54 +52,49 @@ int init_server()
 void connection_handler(double * H, double * T, int lamp[], int ac[], int sp[], int so[])
 {
     unsigned int clen = sizeof(client_addr);
-    int opt = 0;
+    int opt = 0,
+        sp_new[2],
+        so_new[6];
 
     while((client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &clen)))
     {
         int rcv_size;
 
-        // if((rcv_size = recv(client_sock, opt, sizeof(opt), 0)) < 0)
-        // {
-        //     send(client_sock, 1, sizeof(int), 0);
-        // }
-
-        if(opt == 0)
+        if((rcv_size = recv(client_sock, &opt, sizeof(int), 0)) < 0)
         {
-            if((rcv_size = recv(client_sock, H, sizeof(double), 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
-
-            if((rcv_size = recv(client_sock, T, sizeof(double), 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
-
-            if((rcv_size = recv(client_sock, lamp, sizeof(int) * 4, 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
-
-            if((rcv_size = recv(client_sock, ac, sizeof(int) * 2, 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
-
-            if((rcv_size = recv(client_sock, sp, sizeof(int) * 2, 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
-
-            if((rcv_size = recv(client_sock, so, sizeof(int) * 6, 0)) < 0)
-            {
-                send(client_sock, 1, sizeof(int), 0);
-            }
+            send(client_sock, 1, sizeof(int), 0);
         }
 
-        else
+        if((rcv_size = recv(client_sock, H, sizeof(double), 0)) < 0)
         {
-            printf("a\n");
+            send(client_sock, 1, sizeof(int), 0);
         }
+
+        if((rcv_size = recv(client_sock, T, sizeof(double), 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, lamp, sizeof(int) * 4, 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, ac, sizeof(int) * 2, 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, sp, sizeof(int) * 2, 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+
+        if((rcv_size = recv(client_sock, so, sizeof(int) * 6, 0)) < 0)
+        {
+            send(client_sock, 1, sizeof(int), 0);
+        }
+        
 
         close(client_sock);
     }
